@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Tamat — Rofpedia</title>
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🟢</text></svg>">
+</head>
+<body>
+
+<nav class="navbar scrolled" id="navbar">
+  <a href="../index.html" class="nav-logo">
+    <div class="logo-dot"></div>Rof<span class="accent">pedia</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Beranda</a></li>
+    <li><a href="ongoing.html">Ongoing</a></li>
+    <li><a href="complete.html" class="active">Tamat</a></li>
+    <li><a href="schedule.html">Jadwal</a></li>
+    <li><a href="az.html">A–Z</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="api-status" id="apiStatus">
+      <div class="api-dot" id="apiDot"></div>
+      <span id="apiStatusText">Connecting…</span>
+    </div>
+    <div class="search-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Cari anime…" autocomplete="off">
+    </div>
+    <a href="../index.html" class="btn btn-green btn-sm">Beranda</a>
+  </div>
+</nav>
+
+<div class="search-panel" id="searchPanel"></div>
+
+<div style="padding: calc(var(--nav-h) + 40px) var(--content-px) 0;">
+  <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.8px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+    <span style="width:4px;height:28px;background:var(--green-primary);border-radius:2px;display:inline-block;flex-shrink:0"></span>
+    Anime Selesai Tayang
+  </h1>
+  <p style="color:var(--text-muted);font-size:14px;margin-bottom:32px;">Koleksi lengkap anime yang sudah tamat — bisa ditonton kapan saja.</p>
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap;">
+    <div style="font-size:13px;font-weight:600;color:var(--text-secondary);">Halaman <span id="pageLabel">1</span></div>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button class="btn btn-outline btn-sm" onclick="changePage(state.page-1)">‹ Prev</button>
+      <button class="btn btn-outline btn-sm" onclick="changePage(state.page+1)">Next ›</button>
+    </div>
+  </div>
+</div>
+
+<div style="padding:0 var(--content-px);">
+  <div class="anime-grid" id="animeGrid"></div>
+  <div id="pagination" style="margin-top:8px;"></div>
+</div>
+<div style="height:60px;"></div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)App.closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="player-overlay" id="playerOverlay">
+  <div class="player-topbar">
+    <div class="player-title" id="playerTitle">Memuat…</div>
+    <button class="btn btn-icon" onclick="App.closePlayer()">✕</button>
+  </div>
+  <iframe id="playerFrame" class="player-frame" allowfullscreen allow="autoplay;fullscreen" src="about:blank"></iframe>
+  <div class="player-controls">
+    <div class="player-nav-btns">
+      <button class="btn btn-ghost btn-sm" id="playerPrev" style="display:none">‹ Sebelumnya</button>
+      <button class="btn btn-ghost btn-sm" id="playerNext" style="display:none">Berikutnya ›</button>
+    </div>
+    <div class="player-quality-btns" id="playerQuality"></div>
+    <div class="player-download">
+      <button class="btn btn-outline btn-sm" onclick="App.toggleDownloads()">⬇ Download</button>
+    </div>
+  </div>
+  <div class="dl-panel" id="dlPanel"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import * as API from '../js/api.js';
+  import * as UI  from '../js/ui.js';
+  import { makeCard } from '../js/cards.js';
+
+  const state = { page: 1, total: 1 };
+  window.state = state;
+
+  async function load(page) {
+    state.page = page;
+    document.getElementById('pageLabel').textContent = page;
+    UI.renderSkeletonGrid('animeGrid', 24);
+
+    const res = await API.getComplete(page);
+    const grid = document.getElementById('animeGrid');
+    if (!res.success) { grid.innerHTML = UI.errorState(res.error?.message); return; }
+
+    const items = (res.data?.anime || []).map(a => ({
+      title: a.title, url: a.url, poster: a.poster,
+      episode: a.episode, day_or_rating: a.day_or_rating,
+    }));
+    if (!items.length) { grid.innerHTML = UI.emptyState(); return; }
+    grid.innerHTML = items.map(makeCard).join('');
+
+    const pg = res.data?.pagination;
+    if (pg) {
+      state.total = pg.total_pages;
+      document.getElementById('pagination').innerHTML =
+        UI.buildPagination(pg.current_page, pg.total_pages, changePage);
+    }
+  }
+
+  window.changePage = function(p) {
+    if (p < 1 || p > state.total) return;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    load(p);
+  };
+
+  const health = await API.checkHealth();
+  const dot = document.getElementById('apiDot');
+  const txt = document.getElementById('apiStatusText');
+  if (health.success) { dot.classList.add('online'); txt.textContent = 'Online'; }
+  else { dot.classList.add('offline'); txt.textContent = 'Offline'; }
+
+  load(1);
+</script>
+</body>
+</html>

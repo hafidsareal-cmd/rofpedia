@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal Tayang — Rofpedia</title>
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🟢</text></svg>">
+  <style>
+    .sched-page-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      padding: 0 var(--content-px);
+    }
+    .sched-full-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color var(--t-fast);
+    }
+    .sched-full-card:hover { border-color: var(--border-bright); }
+    .sched-full-card.today { border-color: var(--green-primary); }
+    .sched-full-card-header {
+      padding: 14px 18px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+    .sched-full-card.today .sched-full-card-header {
+      background: var(--green-glow);
+    }
+    .sched-day-name {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sched-full-card.today .sched-day-name { color: var(--green-primary); }
+    .today-badge {
+      background: var(--green-primary);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sched-full-anime-list { padding: 8px 0; }
+    .sched-full-anime-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 18px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--t-fast);
+    }
+    .sched-full-anime-item:last-child { border-bottom: none; }
+    .sched-full-anime-item:hover { background: var(--bg-elevated); }
+    .sched-full-anime-item:hover .sched-anime-title { color: var(--green-primary); }
+    .sched-anime-num {
+      width: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .sched-anime-title {
+      font-size: 13px;
+      color: var(--text-secondary);
+      transition: color var(--t-fast);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sched-anime-arrow {
+      margin-left: auto;
+      color: var(--text-muted);
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .sched-empty { padding: 20px 18px; color: var(--text-muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar scrolled" id="navbar">
+  <a href="../index.html" class="nav-logo">
+    <div class="logo-dot"></div>Rof<span class="accent">pedia</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Beranda</a></li>
+    <li><a href="ongoing.html">Ongoing</a></li>
+    <li><a href="complete.html">Tamat</a></li>
+    <li><a href="schedule.html" class="active">Jadwal</a></li>
+    <li><a href="az.html">A–Z</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="api-status" id="apiStatus">
+      <div class="api-dot" id="apiDot"></div>
+      <span id="apiStatusText">Connecting…</span>
+    </div>
+    <div class="search-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Cari anime…" autocomplete="off">
+    </div>
+    <a href="../index.html" class="btn btn-green btn-sm">Beranda</a>
+  </div>
+</nav>
+
+<div class="search-panel" id="searchPanel"></div>
+
+<div style="padding: calc(var(--nav-h) + 40px) var(--content-px) 32px;">
+  <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.8px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+    <span style="width:4px;height:28px;background:var(--green-primary);border-radius:2px;display:inline-block;flex-shrink:0"></span>
+    Jadwal Rilis Mingguan
+  </h1>
+  <p style="color:var(--text-muted);font-size:14px;">
+    Jadwal tayang anime per hari dari otakudesu.blog — realtime.
+  </p>
+</div>
+
+<!-- GRID -->
+<div class="sched-page-grid" id="schedGrid">
+  <!-- skeleton -->
+  ${[0,1,2,3,4,5,6].map(() => `
+    <div class="sched-full-card">
+      <div class="sched-full-card-header">
+        <div class="skeleton skel-line" style="width:80px;height:14px;margin:0"></div>
+      </div>
+      <div class="sched-full-anime-list">
+        ${[0,1,2,3,4].map(() => `<div class="skeleton skel-line" style="margin:10px 18px;width:70%"></div>`).join('')}
+      </div>
+    </div>`).join('')}
+</div>
+
+<div style="height:60px;"></div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)App.closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="player-overlay" id="playerOverlay">
+  <div class="player-topbar">
+    <div class="player-title" id="playerTitle">Memuat…</div>
+    <button class="btn btn-icon" onclick="App.closePlayer()">✕</button>
+  </div>
+  <iframe id="playerFrame" class="player-frame" allowfullscreen allow="autoplay;fullscreen" src="about:blank"></iframe>
+  <div class="player-controls">
+    <div class="player-nav-btns">
+      <button class="btn btn-ghost btn-sm" id="playerPrev" style="display:none">‹ Sebelumnya</button>
+      <button class="btn btn-ghost btn-sm" id="playerNext" style="display:none">Berikutnya ›</button>
+    </div>
+    <div class="player-quality-btns" id="playerQuality"></div>
+    <div class="player-download">
+      <button class="btn btn-outline btn-sm" onclick="App.toggleDownloads()">⬇ Download</button>
+    </div>
+  </div>
+  <div class="dl-panel" id="dlPanel"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import * as API from '../js/api.js';
+  import * as UI  from '../js/ui.js';
+  import { makeSearchResult } from '../js/cards.js';
+
+  const DAY_NAMES = ['senin','selasa','rabu','kamis','jumat','sabtu','minggu'];
+  const todayIdx  = UI.todayIdx();
+
+  async function load() {
+    const health = await API.checkHealth();
+    const dot = document.getElementById('apiDot');
+    const txt = document.getElementById('apiStatusText');
+    if (health.success) { dot.classList.add('online'); txt.textContent = 'Online'; }
+    else { dot.classList.add('offline'); txt.textContent = 'Offline'; }
+
+    const res = await API.getSchedule();
+    const grid = document.getElementById('schedGrid');
+
+    if (!res.success || !res.data?.length) {
+      grid.innerHTML = UI.errorState(res.error?.message || 'Tidak ada jadwal.');
+      return;
+    }
+
+    grid.innerHTML = res.data.map(day => {
+      const isToday = DAY_NAMES.some((d,i) => i === todayIdx && day.day?.toLowerCase().includes(d));
+      const animeItems = (day.anime || []).map((a, i) => `
+        <div class="sched-full-anime-item"
+             onclick="openDetail('${encodeURIComponent(a.url)}','${encodeURIComponent(a.title)}')">
+          <span class="sched-anime-num">${i + 1}</span>
+          <span class="sched-anime-title">${a.title}</span>
+          <span class="sched-anime-arrow">›</span>
+        </div>`).join('');
+
+      return `
+        <div class="sched-full-card ${isToday ? 'today' : ''}">
+          <div class="sched-full-card-header">
+            <span class="sched-day-name">${day.day}</span>
+            ${isToday ? '<span class="today-badge">Hari Ini</span>' : `<span style="color:var(--text-muted);font-size:12px">${(day.anime||[]).length} anime</span>`}
+          </div>
+          <div class="sched-full-anime-list">
+            ${animeItems || '<div class="sched-empty">Tidak ada jadwal.</div>'}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  window.openDetail = function(encURL, encTitle) {
+    // redirect to index with params
+    window.location.href = `../index.html#anime=${encURL}&title=${encTitle}`;
+  };
+
+  // search
+  const searchInput = document.getElementById('searchInput');
+  const panel       = document.getElementById('searchPanel');
+  let timer;
+  searchInput?.addEventListener('input', e => {
+    clearTimeout(timer);
+    const q = e.target.value.trim();
+    if (!q) { panel.classList.remove('open'); return; }
+    timer = setTimeout(async () => {
+      const res = await API.searchAnime(q);
+      const results = res.data || [];
+      panel.innerHTML = results.length
+        ? results.map(makeSearchResult).join('')
+        : '<div class="search-empty">Tidak ditemukan.</div>';
+      panel.classList.add('open');
+    }, 480);
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#searchPanel') && !e.target.closest('.search-bar'))
+      panel.classList.remove('open');
+  });
+
+  load();
+</script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Rofpedia — Nonton anime subtitle Indonesia terlengkap">
+  <title>Rofpedia — Nonton Anime Sub Indo</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- Favicon emoji -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🟢</text></svg>">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <a href="/" class="nav-logo">
+    <div class="logo-dot"></div>
+    Rof<span class="accent">pedia</span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#"             class="active"  onclick="return false;">Beranda</a></li>
+    <li><a href="#sec-ongoing"                  onclick="App.scrollToSection('sec-ongoing');return false;">Ongoing</a></li>
+    <li><a href="#sec-complete"                 onclick="App.scrollToSection('sec-complete');return false;">Tamat</a></li>
+    <li><a href="#sec-schedule"                 onclick="App.scrollToSection('sec-schedule');return false;">Jadwal</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <div class="api-status" id="apiStatus">
+      <div class="api-dot" id="apiDot"></div>
+      <span id="apiStatusText">Connecting…</span>
+    </div>
+
+    <div class="search-bar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Cari anime…" autocomplete="off">
+    </div>
+
+    <button class="btn btn-green btn-sm">Daftar</button>
+  </div>
+</nav>
+
+<!-- Search dropdown -->
+<div class="search-panel" id="searchPanel"></div>
+
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section class="hero" id="heroSection">
+  <div class="hero-bg" id="heroBg"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="5,3 19,12 5,21"/>
+      </svg>
+      Sedang Tayang
+    </div>
+
+    <h1 class="hero-title" id="heroTitle">Memuat…</h1>
+    <div class="hero-meta" id="heroMeta"></div>
+    <p  class="hero-desc"  id="heroDesc">Mengambil data dari otakudesu…</p>
+
+    <div class="hero-actions">
+      <button class="btn btn-green btn-lg" onclick="App.openHeroModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5,3 19,12 5,21"/>
+        </svg>
+        Tonton Sekarang
+      </button>
+      <button class="btn btn-ghost btn-lg" onclick="App.openHeroModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8"  x2="12"   y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Info Detail
+      </button>
+    </div>
+  </div>
+
+  <div class="hero-dots" id="heroDots"></div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     GENRE FILTER
+══════════════════════════════════════════ -->
+<div class="genre-bar" id="genreRow">
+  <div class="genre-chip active" onclick="App.filterGenreBySlug('','Semua')">Semua</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     ONGOING
+══════════════════════════════════════════ -->
+<section class="section" id="sec-ongoing">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="bar"></span>
+        Sedang Tayang
+      </h2>
+      <a class="section-more" href="#" onclick="App.scrollToSection('sec-ongoing');return false;">
+        Lihat Semua →
+      </a>
+    </div>
+  </div>
+
+  <div class="row-wrapper">
+    <button class="row-btn prev" onclick="App.scrollRow('ongoingRow',-600)">‹</button>
+    <div class="anime-row" id="ongoingRow"></div>
+    <button class="row-btn next" onclick="App.scrollRow('ongoingRow', 600)">›</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     COMPLETE
+══════════════════════════════════════════ -->
+<section class="section" id="sec-complete">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="bar"></span>
+        Selesai Tayang
+      </h2>
+      <a class="section-more" href="#" onclick="App.scrollToSection('sec-complete');return false;">
+        Lihat Semua →
+      </a>
+    </div>
+  </div>
+
+  <div class="row-wrapper">
+    <button class="row-btn prev" onclick="App.scrollRow('completeRow',-600)">‹</button>
+    <div class="anime-row" id="completeRow"></div>
+    <button class="row-btn next" onclick="App.scrollRow('completeRow', 600)">›</button>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     SCHEDULE
+══════════════════════════════════════════ -->
+<section class="section" id="sec-schedule">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="bar"></span>
+        Jadwal Tayang Minggu Ini
+      </h2>
+    </div>
+  </div>
+  <div class="schedule-strip" id="scheduleStrip"></div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="logo-dot"></div>
+        Rof<span>pedia</span>
+      </div>
+      <p class="footer-desc">
+        Platform nonton anime dengan subtitle Indonesia.
+        Data real-time langsung dari otakudesu.blog —
+        episode baru tayang otomatis muncul.
+      </p>
+    </div>
+
+    <div>
+      <div class="footer-col-title">Navigasi</div>
+      <ul class="footer-links">
+        <li><a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Beranda</a></li>
+        <li><a href="#" onclick="App.scrollToSection('sec-ongoing');return false;">Ongoing</a></li>
+        <li><a href="#" onclick="App.scrollToSection('sec-complete');return false;">Selesai</a></li>
+        <li><a href="#" onclick="App.scrollToSection('sec-schedule');return false;">Jadwal</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="footer-col-title">Genre</div>
+      <ul class="footer-links" id="footerGenres"></ul>
+    </div>
+
+    <div>
+      <div class="footer-col-title">Info</div>
+      <ul class="footer-links">
+        <li><a href="#">Tentang Kami</a></li>
+        <li><a href="#">Kontak</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">DMCA</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2025 Rofpedia — All rights reserved</span>
+    <span class="powered">✦ Powered by otakudesu.blog</span>
+  </div>
+</footer>
+
+
+<!-- ══════════════════════════════════════════
+     ANIME DETAIL MODAL
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay"
+     onclick="if(event.target===this)App.closeModal()">
+  <div class="modal" id="modal">
+    <!-- populated by app.js → buildModalHTML() -->
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PLAYER OVERLAY
+══════════════════════════════════════════ -->
+<div class="player-overlay" id="playerOverlay">
+  <div class="player-topbar">
+    <div class="player-title" id="playerTitle">Memuat…</div>
+    <button class="btn btn-icon" onclick="App.closePlayer()">✕</button>
+  </div>
+
+  <iframe id="playerFrame" class="player-frame"
+          allowfullscreen
+          allow="autoplay; fullscreen; encrypted-media"
+          src="about:blank"></iframe>
+
+  <div class="player-controls">
+    <div class="player-nav-btns">
+      <button class="btn btn-ghost btn-sm" id="playerPrev" style="display:none">‹ Sebelumnya</button>
+      <button class="btn btn-ghost btn-sm" id="playerNext" style="display:none">Berikutnya ›</button>
+    </div>
+    <div class="player-quality-btns" id="playerQuality"></div>
+    <div class="player-download">
+      <button class="btn btn-outline btn-sm" onclick="App.toggleDownloads()">⬇ Download</button>
+    </div>
+  </div>
+
+  <div class="dl-panel" id="dlPanel"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TOAST
+══════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT (ES Modules)
+══════════════════════════════════════════ -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
